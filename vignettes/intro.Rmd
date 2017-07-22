@@ -1,0 +1,104 @@
+---
+title: "Introduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `seqR` package provides a set of functions for ordinal sequence analysis with a focus on three methods:
+
+1. **Contigency tables** illustrating observed pairs between all the different combinations of a given set of variables.
+    
+2. **Percentage tables** summarizing how often a given variable `X` is observed to be larger than `Y`, and vice versa.
+    
+3. **Bubble plots** for visualizing transitions between paired observations for two variables.
+    
+This vignette will provide an example analysis using a subset of the [Varieties of Democracy](https://v-dem.net) dataset.
+
+---
+
+**Warning**: `seqR` currently assumes that your data is indexed at `0`.
+
+---
+
+## Data: vdem
+
+The example V-Dem dataset (`seqR::vdem`) included in the package contains ordinalized versions of the Political Civil Liberties Index and the eleven related constituent lower-level indicators for the country Ghana from 1902-2016 (for full documentation, `?vdem`). The data was taken as is with two exceptions:
+
+1. The freedom of expression index (`e_v2x_clpol_5C`) was rescaled from 0-1 to 0-4. 
+    
+2. The number of states for the variable `v2meslfcen_ord` was adjusted so that all variables (including our index) have 5 possible states (or values). This was done by the following function where `V` represents our vector of values for `v2meslfcen_ord` with a transformation from 4 states to 5.
+    
+```{R eval = F}
+function(V) round(((5 - 1) / (4 - 1)) * V
+```
+   
+   
+## Contingency Table
+If we want to quickly create a contingency matrix showing the observed pairs between all of the different combinations of our variables we can use the function `ql_matrix`. 
+
+The `S3` object returned is simply a matrix with the `ql_mat` inherited class. We can summarize our results and even decompose the table to show the individual relationships for a target variable.
+
+```{R eval = F}
+indicators <- setdiff(colnames(vdem), c("country_name", "year"))
+full.matrix <- ql_matrix(vdem[, indicators], na.rm = T)
+
+# Print a summarized table of our contingency matrix
+summary(full.matrix)
+
+# Convert to a list of matrices for each variable
+ll.matrix <- as.list(full.matrix)
+```
+
+### Isolating Increasing/Decreasing Sequences
+The package includes the utility function `findMovement`, which, given a vector, returns the intervals of subsequences based on movement --- additional options, such as buffering and lower/upper thresholds can be explored in the function documentation, `?findMovement`. At the risk of stating the obvious, it should be noted that **order matters** when passing a vector to `findMovement`.
+
+For example, if we want to only look at the country-years where our civil liberties index is increasing:
+
+```{R eval = F}
+# Return the intervals of increasing subsequences
+v <- findMovement(vdem$e_v2x_clpol_5C, direction = "up")
+
+# Remove the rows from vdem where v != NA (ie, where clpol is decreasing)
+vdem_inc <- vdem[!is.na(v), ]
+full.matrix2 <- ql_matrix(vdem_inc[, indicators], na.rm = T)
+```
+
+## Percentage tables
+A percentage table indicates the percentage of the overall observations for each combinations of variables where one is larger than the other and vice versa. The `ptable` function will calculate a percentage table for all variables in a given data frame.
+
+
+```{R eval = F}
+ptable(vdem[, !colnames(vdem) %in% c("country_name", "year")])
+
+```
+
+To construct a ptable of only transitions we can use the utility function `collapse` to reduce our data frame. Useful if we're concerned about unchanging observations biasing our results.
+
+```{R eval = F}
+vdem_ordered <- vdem[order(vdem$country_name, vdem$year), ]
+vdem_reduced <- collapse(vdem_ordered[, !colnames(vdem) %in%
+                                        c("country_name", "year")])
+
+nrow(vdem)
+
+# We've shrunk!
+nrow(vdem_reduced)
+
+ptable(vdem_reduced)
+```
+
+## Bubble Plots
+Finally, we can create directed adjacency graphs to visualize the transitions between observed pairs for two variables using the `bubbleplot` function.
+
+Alternatively, we can construct an adjacency matrix first using `adj_mat`. This is important if we have, for example, a list of sequences split by a grouping variable for which we would like to separately create adjacency matrices that we add together before plotting. The object returned can then be plotted using the normal `plot` function.
+
+```{R eval = F}
+bubbleplot(v2x_clpol_5C, v2clacfree, data = vdem, xlab = "clpol", ylab = "clacfree")
+
+# Alternative method
+m <- adj_matrix(vdem$e_v2x_clpol_5C, vdem$v2clacfree)
+plot(m, xlab = "clpol", ylab = "clacfree")
+```

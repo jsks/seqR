@@ -1,0 +1,36 @@
+ql_mat <- function(o) {
+    m <- as.matrix(o) %>% structure(class = c("ql_mat", class(.)))
+    storage.mode(m) <- "double"
+
+    m
+}
+
+test_that("ql_matrix fuction", {
+    df <- data.frame(x = c(0, 0, 1),
+                     y = c(3, 1, 4),
+                     z = c(1, 1, 1))
+    qlm <- ql_matrix(df, "x")
+
+    expect_s3_class(qlm, "ql_mat")
+    expect_true(is.ql_mat(qlm))
+
+    o <- read.csv2("ql_matrix_x.csv", row.names = 1) %>% ql_mat
+    expect_identical(qlm, o)
+
+    o <- read.csv2("ql_matrix_xy.csv", row.names = 1) %>% ql_mat
+    expect_identical(ql_matrix(df, c("x", "y")), o)
+
+    df <- data.frame(x = c(0, 0, 1, 1, 1, 1, 1, 1),
+                     y = c(3, 0, 0, 0, 1, NA, 0, 4))
+
+    o <- read.csv2("ql_matrix_05.csv", row.names = 1) %>% ql_mat
+    expect_identical(ql_matrix(df, "x", na.rm = T), o)
+
+    o <- read.csv2("ql_matrix_75.csv", row.names = 1) %>% ql_mat
+    expect_identical(ql_matrix(df, "x", na.rm = T, p = 0.75), o)
+    
+    expect_error(ql_matrix(df))
+    expect_error(ql_matrix(data.frame()))
+    expect_error(ql_matrix(data.frame(z = c(1, 2))))
+    expect_error(ql_matrix(data.frame(x = 1, y = 2), "z"))
+})

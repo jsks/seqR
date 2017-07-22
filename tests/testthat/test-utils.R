@@ -1,0 +1,12 @@
+test_that("Testing misc functions", {
+    expect_equal(NULL %||% T, T)
+    expect_equal(T %||% NULL, T)
+    expect_equal(NA %||% T, T)
+    expect_equal(NaN %||% T, T)
+    expect_equal(numeric(0) %||% T, T)
+    expect_equal(undefined_variable %||% T, T)
+    expect_equal(F %||% T, F)
+    expect_equal("" %||% T, "")
+    expect_equal(0 %||% T, 0)
+    expect_equal(NULL %||% NULL, NULL)
+})
