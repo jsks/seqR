@@ -1,5 +1,4 @@
-## `seqR` - Sequence Analysis in R
----
+## seqR - Sequence Analysis in R
 
 To get started, install with devtools:
 
