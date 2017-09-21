@@ -28,6 +28,12 @@ test_that("ql_matrix fuction", {
 
     o <- read.csv2("ql_matrix_75.csv", row.names = 1) %>% ql_mat
     expect_identical(ql_matrix(df, "x", na.rm = T, p = 0.75), o)
+
+    df <- data.frame(x = c(0, 0, 0, 1, 1, 1),
+                    y = c(NA, NA, NA, 1, 1, 1),
+                    z = c(NA, NA, NA, 0, 0, 0))
+    o <- read.csv2("ql_matrix_missing.csv", row.names = 1) %>% ql_mat
+    expect_identical(ql_matrix(df, "x", na.rm = T), o)
     
     expect_error(ql_matrix(df))
     expect_error(ql_matrix(data.frame()))

@@ -39,6 +39,10 @@ ql_matrix <- function(data, vars = colnames(data), p = 0.05, ...) {
             tapply(data[[s]], g, function(v) stats::quantile(v, p, ...) %>% round)
         }, numeric(nlevels(g)))
 
+        # If no obs make sure we still appear in output table
+        if (nrow(m) == 0)
+            m <- rbind(m, NA)
+
         if (nlevels(g) == 1)
             m <- t(m)
 
