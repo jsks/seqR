@@ -4,13 +4,8 @@ ttm_plot <- function(x, ...) {
     g <- igraph::graph.adjacency(x, mode = "directed", weighted = T, diag = F)
     igraph::V(g)$color <- "skyblue"
 
-
-    # We want a frequency table, can reproduce from adjacency matrix
-    # by first doubling diag (state transitions to itself).
-    diag(x) <- diag(x) * 2
-
     # This is an ugly hack to make 0 sized vertices "invisible"
-    igraph::V(g)$size <- ifelse((x <- rowSums(x)) == 0, 0.0001, x)
+    igraph::V(g)$size <- ifelse((y <- rowSums(x)) == 0, 0.0001, y) / (size + 1)
 
     graphics::plot(g, vertex.label = NA, vertex.frame.color = NA,
          layout = igraph::layout.grid(g, width = 0, height = 0),
