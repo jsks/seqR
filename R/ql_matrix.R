@@ -71,6 +71,41 @@ ql_matrix <- function(data, vars = colnames(data), p = 0.05, ...) {
     structure(f.m, class = c("ql_mat", class(f.m)))
 }
 
+add_empty <- function(x, y) {
+    fn <- function(missing) as.list(setNames(rep(NA, length(missing)), missing))
+                            
+    empty_cols <- setdiff(colnames(y), colnames(x)) %>% fn
+    empty_rows <- setdiff(rownames(y), rownames(x)) %>% fn
+
+    x2 <- do.call(cbind, c(list(x), empty_cols))
+    final <- do.call(rbind, c(list(x2), empty_rows))
+
+    final[order(rownames(final)), order(colnames(final))]
+}
+
+
+#' @export
+`+.ql_mat` <- function(x, y) {
+    x <- add_empty(x, y)
+    y <- add_empty(y, x)
+
+    out <- matrix(NA, nrow(x), ncol(x), dimnames = list(rownames(x), colnames(x)))
+
+    out[] <- vapply(1:length(x), function(i) {
+        ifelse(is.na(x[i]) | is.na(y[i]), x[i] %||% y[i], x[i] + y[i])
+    }, numeric(1))
+
+    rows <- setdiff(rownames(out), "sums")
+    cols <- setdiff(colnames(out), "sums")
+    
+    out <- out[c(rows, "sums"), c(cols, "sums")]
+    out <- out[order(out[, ncol(out)], decreasing = T),
+              order(out[nrow(out), ], decreasing = F)]
+
+    structure(out, class = c("ql_mat", class(out)))
+}
+
+
 #' @export
 print.ql_matrix <- function(x, ...) {
     class(x) <- "matrix"
