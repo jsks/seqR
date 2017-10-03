@@ -147,8 +147,8 @@ summary.ql_mat <- function(object, ...) {
         state_sum <- sum(m[, nr_states], na.rm = T)
         total_sum <- sum(m, na.rm = T)
 
-        list("Num of States" = nr_states, "Num of Dependents" = nrow(m),
-             "Matrix Column Sum" = state_sum, "Total Sum" = total_sum)
+        c("Num of States" = nr_states, "Num of Dependents" = nrow(m),
+          "Matrix Column Sum" = state_sum, "Total Sum" = total_sum)
     })
 
     out <- do.call(rbind, ll)
