@@ -40,7 +40,7 @@ ql_matrix <- function(data, vars = colnames(data), p = 0.05, ...) {
         }, numeric(nlevels(g)))
 
         # If no obs make sure we still appear in output table
-        if (nrow(m) == 0)
+        if (class(m) == "matrix" && nrow(m) == 0)
             m <- rbind(m, NA)
 
         if (nlevels(g) == 1)
@@ -83,15 +83,25 @@ add_empty <- function(x, y) {
     final[order(rownames(final)), order(colnames(final))]
 }
 
+#' @export
+combine <- function(x, y) UseMethod("combine")
 
 #' @export
-`+.ql_mat` <- function(x, y) {
+combine.ql_mat <- function(x, y) {
+    rows <- intersect(rownames(x), rownames(y)) %>% setdiff("sums")
+    cols <- intersect(colnames(x), colnames(y)) %>% setdiff("sums")
+
+    # We only want to combine unique ql matrices
+    if (length(cols) > 1 & any(!is.na(x[rows, cols]) & !is.na(y[rows, cols])))
+        stop("Overlapping matrices, unable to combine")
+
     x <- add_empty(x, y)
     y <- add_empty(y, x)
 
     out <- matrix(NA, nrow(x), ncol(x), dimnames = list(rownames(x), colnames(x)))
 
     out[] <- vapply(1:length(x), function(i) {
+        # We're only adding together for the sums cols
         ifelse(is.na(x[i]) | is.na(y[i]), x[i] %||% y[i], x[i] + y[i])
     }, numeric(1))
 
@@ -107,7 +117,7 @@ add_empty <- function(x, y) {
 
 
 #' @export
-print.ql_matrix <- function(x, ...) {
+print.ql_mat <- function(x, ...) {
     class(x) <- "matrix"
     print(x, ...)
 }

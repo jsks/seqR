@@ -40,3 +40,20 @@ test_that("ql_matrix fuction", {
     expect_error(ql_matrix(data.frame(z = c(1, 2))))
     expect_error(ql_matrix(data.frame(x = 1, y = 2), "z"))
 })
+
+test_that("combine ql matrices", {
+    df1 <- data.frame(x = c(1, 1, 2), y = c(0, 0, 0))
+    df2 <- data.frame(x = c(1, 2, 1), y = c(2, 2, 3))
+
+    expect_error(combine(ql_matrix(df1), ql_matrix(df2)))
+
+    df1 <- data.frame(x = c(1, 1, 2), y = c(0, 0, 0))
+    df2 <- data.frame(x = c(0, 0, 2), z = c(1, 1, 2))
+    df3 <- data.frame(y = c(2, 1, 2), z = c(2, 2, 1))
+
+    result <- lapply(list(df1, df2, df3), ql_matrix) %>% Reduce(combine, .)
+    o <- read.csv2("ql_matrix_combine.csv", row.names = 1) %>% ql_mat
+    expect_identical(result, o)
+})
+
+
