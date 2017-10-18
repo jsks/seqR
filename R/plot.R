@@ -51,10 +51,3 @@ plot.adj_mat <- ttm_plot
 is.adj_mat <- function(x) {
     inherits(x, "adj_mat")
 }
-
-#' @export
-print.ql_matrix <- function(x, ...) {
-    class(x) <- "matrix"
-    print(x, ...)
-}
-

@@ -4,10 +4,12 @@
 \alias{collapse}
 \title{Collapse a data frame}
 \usage{
-collapse(data)
+collapse(data, include_na = FALSE)
 }
 \arguments{
 \item{data}{A data.frame. Data to collapse}
+
+\item{include_na}{Boolean. Whether to collapse consecutive NAs.}
 }
 \value{
 A \code{data.frame} of row size: \code{0 < N <= nrow(data)}.
