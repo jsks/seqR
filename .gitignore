@@ -2,4 +2,6 @@
 /**/*.rds
 /**/*.so
 /**/*.o
+/**/*.tar.gz
 inst/doc
+

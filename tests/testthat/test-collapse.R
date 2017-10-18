@@ -29,6 +29,13 @@ test_that("Collapse function", {
 
     expect_identical(collapse(df), out)
 
+    # Collapse with multiple NAs
+    df <- data.frame(x = c(NA, NA, NA), y = c(1, 1, 1))
+    out <- data.frame(x = c(NA, NA, NA), y = c(1, 1, 1))
+
+    expect_identical(collapse(df, include_na = T), out)
+    expect_identical(collapse(df), data.frame(x = NA, y = 1))
+
     # Collapse and preserve rownames
     df <- data.frame(x = c(1, 1, 1))
     rownames(df) <- c("a", "b", "c")
