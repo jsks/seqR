@@ -42,7 +42,8 @@ adj_matrix <- function(x, y, states = NULL) {
 #'
 #' Collapse unchanging consecutive observations for a given data frame.
 #'
-#' @param data A data.frame. Data to collapse 
+#' @param data A data.frame. Data to collapse
+#' @param include_na Boolean. Whether to collapse consecutive NAs.
 #'
 #' @details If the given data frame contains multiple columns, then
 #'          an observation is only collapsed if all of the columns
@@ -68,8 +69,8 @@ adj_matrix <- function(x, y, states = NULL) {
 #' collapse(y)
 #'
 #' @export
-collapse <- function(data) {
-    .Call('_seqR_collapse', PACKAGE = 'seqR', data)
+collapse <- function(data, include_na = FALSE) {
+    .Call('_seqR_collapse', PACKAGE = 'seqR', data, include_na)
 }
 
 #' Find subsequences based on movement

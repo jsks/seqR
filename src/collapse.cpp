@@ -4,10 +4,15 @@
 using namespace Rcpp;
 using namespace std;
 
-template <int RTYPE> LogicalVector lagged_compare_t(Vector<RTYPE> v) {
+template <int RTYPE> LogicalVector lagged_compare_t(Vector<RTYPE> v, bool na) {
   LogicalVector out(v.size(), false);
 
   for (unsigned int i = v.size() - 1; i > 0; i--) {
+    if (na && (Vector<RTYPE>::is_na(v[i]) || Vector<RTYPE>::is_na(v[i - 1]))) {
+      out[i] = true;
+      continue;
+    }
+
     if (v[i] != v[i - 1])
       out[i] = true;
   }
@@ -16,17 +21,17 @@ template <int RTYPE> LogicalVector lagged_compare_t(Vector<RTYPE> v) {
   return out;
 }
 
-LogicalVector lagged_compare(SEXP v) {
+LogicalVector lagged_compare(SEXP v, bool na) {
   // Only allow subset of vector types that support using `!=` op
   switch (TYPEOF(v)) {
     case REALSXP:
-      return lagged_compare_t<REALSXP>(v);
+      return lagged_compare_t<REALSXP>(v, na);
     case INTSXP:
-      return lagged_compare_t<INTSXP>(v);
+      return lagged_compare_t<INTSXP>(v, na);
     case STRSXP:
-      return lagged_compare_t<STRSXP>(v);
+      return lagged_compare_t<STRSXP>(v, na);
     case LGLSXP:
-      return lagged_compare_t<LGLSXP>(v);
+      return lagged_compare_t<LGLSXP>(v, na);
     default:
       stop("Unsupported type in column");
   }
@@ -45,7 +50,8 @@ SEXP subset(SEXP v, LogicalVector b) {
 //'
 //' Collapse unchanging consecutive observations for a given data frame.
 //'
-//' @param data A data.frame. Data to collapse 
+//' @param data A data.frame. Data to collapse
+//' @param include_na Boolean. Whether to collapse consecutive NAs.
 //'
 //' @details If the given data frame contains multiple columns, then
 //'          an observation is only collapsed if all of the columns
@@ -72,7 +78,7 @@ SEXP subset(SEXP v, LogicalVector b) {
 //'
 //' @export
 // [[Rcpp::export]]
-List collapse(DataFrame data) {
+List collapse(DataFrame data, bool include_na = false) {
   int ncols = data.size();
 
   if (data.nrow() < 2)
@@ -81,7 +87,7 @@ List collapse(DataFrame data) {
   vector<LogicalVector> col_bools(ncols);
 
   for (unsigned int i = 0; i < ncols; i++) {
-    col_bools[i] = lagged_compare(data[i]);
+    col_bools[i] = lagged_compare(data[i], include_na);
   }
 
   auto f = [](LogicalVector m, LogicalVector n) { return m | n; };

@@ -19,13 +19,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // collapse
-List collapse(DataFrame data);
-RcppExport SEXP _seqR_collapse(SEXP dataSEXP) {
+List collapse(DataFrame data, bool include_na);
+RcppExport SEXP _seqR_collapse(SEXP dataSEXP, SEXP include_naSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(collapse(data));
+    Rcpp::traits::input_parameter< bool >::type include_na(include_naSEXP);
+    rcpp_result_gen = Rcpp::wrap(collapse(data, include_na));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -49,7 +50,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_seqR_adj_matrix", (DL_FUNC) &_seqR_adj_matrix, 3},
-    {"_seqR_collapse", (DL_FUNC) &_seqR_collapse, 1},
+    {"_seqR_collapse", (DL_FUNC) &_seqR_collapse, 2},
     {"_seqR_findMovement", (DL_FUNC) &_seqR_findMovement, 7},
     {NULL, NULL, 0}
 };
