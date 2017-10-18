@@ -2,11 +2,12 @@
 
 S3method(as.list,ql_mat)
 S3method(plot,adj_mat)
-S3method(print,ql_matrix)
+S3method(print,ql_mat)
 S3method(summary,ql_mat)
 export(adj_matrix)
 export(bubbleplot)
 export(collapse)
+export(combine.ql_mat)
 export(findMovement)
 export(is.adj_mat)
 export(is.ql_mat)

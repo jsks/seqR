@@ -40,7 +40,7 @@ ql_matrix <- function(data, vars = colnames(data), p = 0.05, ...) {
         }, numeric(nlevels(g)))
 
         # If no obs make sure we still appear in output table
-        if (nrow(m) == 0)
+        if (class(m) == "matrix" && nrow(m) == 0)
             m <- rbind(m, NA)
 
         if (nlevels(g) == 1)
@@ -71,8 +71,53 @@ ql_matrix <- function(data, vars = colnames(data), p = 0.05, ...) {
     structure(f.m, class = c("ql_mat", class(f.m)))
 }
 
+add_empty <- function(x, y) {
+    fn <- function(missing) as.list(setNames(rep(NA, length(missing)), missing))
+                            
+    empty_cols <- setdiff(colnames(y), colnames(x)) %>% fn
+    empty_rows <- setdiff(rownames(y), rownames(x)) %>% fn
+
+    x2 <- do.call(cbind, c(list(x), empty_cols))
+    final <- do.call(rbind, c(list(x2), empty_rows))
+
+    final[order(rownames(final)), order(colnames(final))]
+}
+
 #' @export
-print.ql_matrix <- function(x, ...) {
+combine <- function(x, y) UseMethod("combine")
+
+#' @export
+combine.ql_mat <- function(x, y) {
+    rows <- intersect(rownames(x), rownames(y)) %>% setdiff("sums")
+    cols <- intersect(colnames(x), colnames(y)) %>% setdiff("sums")
+
+    # We only want to combine unique ql matrices
+    if (length(cols) > 1 & any(!is.na(x[rows, cols]) & !is.na(y[rows, cols])))
+        stop("Overlapping matrices, unable to combine")
+
+    x <- add_empty(x, y)
+    y <- add_empty(y, x)
+
+    out <- matrix(NA, nrow(x), ncol(x), dimnames = list(rownames(x), colnames(x)))
+
+    out[] <- vapply(1:length(x), function(i) {
+        # We're only adding together for the sums cols
+        ifelse(is.na(x[i]) | is.na(y[i]), x[i] %||% y[i], x[i] + y[i])
+    }, numeric(1))
+
+    rows <- setdiff(rownames(out), "sums")
+    cols <- setdiff(colnames(out), "sums")
+    
+    out <- out[c(rows, "sums"), c(cols, "sums")]
+    out <- out[order(out[, ncol(out)], decreasing = T),
+              order(out[nrow(out), ], decreasing = F)]
+
+    structure(out, class = c("ql_mat", class(out)))
+}
+
+
+#' @export
+print.ql_mat <- function(x, ...) {
     class(x) <- "matrix"
     print(x, ...)
 }
