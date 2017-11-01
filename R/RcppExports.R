@@ -10,6 +10,9 @@
 #' @param states Optional integer. Specify the max number of states
 #'          between the two vectors. The outputed matrix will be of
 #'          size `states ^ 2 x states ^ 2`. Default: `max(a, b)`.
+#' @param direction Optional string. Specify "up" to create an
+#'          adjacency matrix from only increasing transitions, or
+#'          "down" for decreasing transitions.
 #'
 #' @section Warning: `adj_matrix` assumes that the target
 #'            variables are indexed at 0.
@@ -34,8 +37,8 @@
 #' adj_matrix(x, y) # `states` will be set to 3
 #'
 #' @export
-adj_matrix <- function(x, y, states = NULL) {
-    .Call('_seqR_adj_matrix', PACKAGE = 'seqR', x, y, states)
+adj_matrix <- function(x, y, states = NULL, direction = NULL) {
+    .Call('_seqR_adj_matrix', PACKAGE = 'seqR', x, y, states, direction)
 }
 
 #' Collapse a data frame

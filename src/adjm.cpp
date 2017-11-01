@@ -11,6 +11,9 @@ using namespace Rcpp;
 //' @param states Optional integer. Specify the max number of states
 //'          between the two vectors. The outputed matrix will be of
 //'          size `states ^ 2 x states ^ 2`. Default: `max(a, b)`.
+//' @param direction Optional string. Specify "up" to create an
+//'          adjacency matrix from only increasing transitions, or
+//'          "down" for decreasing transitions.
 //'
 //' @section Warning: `adj_matrix` assumes that the target
 //'            variables are indexed at 0.
@@ -37,7 +40,8 @@ using namespace Rcpp;
 //' @export
 // [[Rcpp::export]]
 NumericMatrix adj_matrix(NumericVector x, NumericVector y,
-                         Nullable<int> states = R_NilValue) {
+                         Nullable<int> states = R_NilValue,
+                         Nullable<String> direction = R_NilValue) {
   int x_len = x.size();
   int y_len = y.size();
 
@@ -46,6 +50,14 @@ NumericMatrix adj_matrix(NumericVector x, NumericVector y,
   
   if (x_len < 2)
     stop("Expects two or more observations");
+
+  String dir;
+  if (direction.isNotNull()) {
+    dir = as<String>(direction);
+
+    if (dir != "up" && dir != "down")
+      stop("Invalid direction argument");
+  }
 
   int n;
   if (states.isNotNull()) {
@@ -66,12 +78,21 @@ NumericMatrix adj_matrix(NumericVector x, NumericVector y,
   LogicalVector na_v = is_na(x) | is_na(y);
 
   for (unsigned int i = 0; i < x_len - 1; i++) {
-    if (!na_v[i] && !na_v[i + 1]) {
-      int from = (n * x[i]) + y[i];
-      int to = (n * x[i + 1]) + y[i + 1];
+    if (na_v[i] || na_v[i + 1])
+      continue;
 
-      out(from, to)++;
+    if (direction.isNotNull()) {
+      int d = (x[i + 1] - x[i]) + (y[i + 1] - y[i]);
+
+      if ((dir == "up" && d <= 0) ||
+          (dir == "down" && d >= 0))
+        continue;
     }
+
+    int from = (n * x[i]) + y[i];
+    int to = (n * x[i + 1]) + y[i + 1];
+
+    out(from, to)++;
   }
 
   out.attr("class") = CharacterVector::create("adj_mat", "matrix");

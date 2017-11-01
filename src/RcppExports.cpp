@@ -6,15 +6,16 @@
 using namespace Rcpp;
 
 // adj_matrix
-NumericMatrix adj_matrix(NumericVector x, NumericVector y, Nullable<int> states);
-RcppExport SEXP _seqR_adj_matrix(SEXP xSEXP, SEXP ySEXP, SEXP statesSEXP) {
+NumericMatrix adj_matrix(NumericVector x, NumericVector y, Nullable<int> states, Nullable<String> direction);
+RcppExport SEXP _seqR_adj_matrix(SEXP xSEXP, SEXP ySEXP, SEXP statesSEXP, SEXP directionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< Nullable<int> >::type states(statesSEXP);
-    rcpp_result_gen = Rcpp::wrap(adj_matrix(x, y, states));
+    Rcpp::traits::input_parameter< Nullable<String> >::type direction(directionSEXP);
+    rcpp_result_gen = Rcpp::wrap(adj_matrix(x, y, states, direction));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -49,7 +50,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_seqR_adj_matrix", (DL_FUNC) &_seqR_adj_matrix, 3},
+    {"_seqR_adj_matrix", (DL_FUNC) &_seqR_adj_matrix, 4},
     {"_seqR_collapse", (DL_FUNC) &_seqR_collapse, 2},
     {"_seqR_findMovement", (DL_FUNC) &_seqR_findMovement, 7},
     {NULL, NULL, 0}

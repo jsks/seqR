@@ -4,7 +4,7 @@
 \alias{adj_matrix}
 \title{Adjacency Matrix}
 \usage{
-adj_matrix(x, y, states = NULL)
+adj_matrix(x, y, states = NULL, direction = NULL)
 }
 \arguments{
 \item{x}{\code{NumericVector}.}
@@ -14,6 +14,10 @@ adj_matrix(x, y, states = NULL)
 \item{states}{Optional integer. Specify the max number of states
 between the two vectors. The outputed matrix will be of
 size \code{states ^ 2 x states ^ 2}. Default: \code{max(a, b)}.}
+
+\item{direction}{Optional string. Specify "up" to create an
+adjacency matrix from only increasing transitions, or
+"down" for decreasing transitions.}
 }
 \value{
 A \code{S3} matrix of class \code{adj_mat}. Can be plotted with the

@@ -34,9 +34,33 @@ test_that("Testing adjacency matrix function", {
 
     expect_identical(adj_matrix(a, b),  out)
 
-    # How about invalid sizes
+
+    # Isolate increasing sequences
+    a <- c(0, 0, 1, 1, 0, 0, 1, 0)
+    b <- c(1, 1, 0, 1, 0, 0, 1, 0)
+
+    adjm <- adj_matrix(a, b, 2, direction = "up")
+
+    out <- matrix(0, 4, 4)
+    out[1, 4] <- 1
+    out[3, 4] <- 1
+    class(out) <- c("adj_mat", "matrix")
+
+    expect_identical(adjm, out)
+
+    # What about going down?
+    adjm <- adj_matrix(a, b, 2, direction = "down")
+
+    out <- matrix(0, 4, 4)
+    out[4, 1] <- 2
+    class(out) <- c("adj_mat", "matrix")
+
+    expect_identical(adjm, out)
+    
+    expect_error(adj_matrix(c("a", "b"), c(1, 2)))
     expect_error(adj_matrix(c(1, 2, 3), c(1, 2)))
     expect_error(adj_matrix(1, 2))
-    
+    expect_error(adj_matrix(c(1, 2), c(1, 2), direction = "blarg"))
+
     # TODO: index starting at 1
 })
