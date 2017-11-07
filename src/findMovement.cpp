@@ -81,18 +81,26 @@ NumericVector findMovement(NumericVector v,
                            Nullable<int> rbuffer = R_NilValue,
                            Nullable<int> upper_lim = R_NilValue,
                            Nullable<int> lower_lim = R_NilValue) {
-
-  int rbufsiz = (rbuffer.isNotNull()) ? as<int>(rbuffer) : buffer;
-  int lbufsiz = (lbuffer.isNotNull()) ? as<int>(lbuffer) : buffer;
-
-  if (rbufsiz < 0 || lbufsiz < 0)
-    stop("Buffer values cannot be less than 0");
-
   if (direction != "down" && direction != "up")
     stop("Invalid direction argument");
 
-  NumericVector vseq = (direction == "down") ? NumericVector(rev(v)) : v;
-  
+  NumericVector vseq;
+  int startbufsiz, stopbufsiz;
+  if (direction == "down") {
+    vseq = NumericVector(rev(v));
+
+    startbufsiz = (rbuffer.isNotNull()) ? as<int>(rbuffer) : buffer;
+    stopbufsiz = (lbuffer.isNotNull()) ? as<int>(lbuffer) : buffer;
+  } else {
+    vseq = v;
+
+    startbufsiz = (lbuffer.isNotNull()) ? as<int>(lbuffer) : buffer;
+    stopbufsiz = (rbuffer.isNotNull()) ? as<int>(rbuffer) : buffer;
+  }
+
+  if (startbufsiz < 0 || stopbufsiz < 0)
+    stop("Buffer values cannot be less than 0");
+
   NumericVector out = NumericVector(vseq.size(), NumericVector::get_na());
   NumericVector d = diff(vseq);
 
@@ -117,12 +125,13 @@ NumericVector findMovement(NumericVector v,
       }
 
       // TODO: pop stack instead of calling .size()
-     int head = stack.front();
-     int tail;
-      if (stack.size() > 1)
+      int head = stack.front();
+      int tail;
+      if (stack.size() > 1) {
         tail = stack.back() + 1;
-      else
+      } else {
         tail = head + 1;
+      }
 
       // If we don't start below lower_lim or end above
       // upper_lim, flush queue and search for next seq
@@ -134,16 +143,15 @@ NumericVector findMovement(NumericVector v,
         continue;
       }
       
-
       // Buffer beginning of sequence
-      if (lbufsiz != 0 && head != stop) {
-        int b = min(head - stop - 1, lbufsiz);
+      if (startbufsiz != 0 && head != stop) {
+        int b = min(head - stop - 1, startbufsiz);
         head = head - b;
       }
 
       // Buffer end of sequence
-      if (rbufsiz != 0 && tail != i + 1) {
-        int b = min(i - tail, rbufsiz);
+      if (stopbufsiz != 0 && tail != i + 1) {
+        int b = min(i - tail, stopbufsiz);
         tail = tail + b;
       }
 

@@ -5,7 +5,6 @@ test_that("Finding subsequences", {
     expect_equal(findMovement(x, direction = "down"),
                  c(rep(1, 3),rep(NA, 11), rep(2, 2), NA))
 
-
     expect_equal(findMovement(x, upper_lim = 3),
                  c(rep(NA, 6), rep(1, 6), rep(NA, 5)))
     expect_equal(findMovement(x, upper_lim = 1),
@@ -21,20 +20,24 @@ test_that("Finding subsequences", {
 
     expect_equal(findMovement(x, buffer = 1),
                  c(rep(NA, 5), rep(1, 8), rep(NA, 2), rep(2, 2)))
+    expect_equal(findMovement(x, rbuffer = 1),
+                 c(rep(NA, 6), rep(1, 7), rep(NA, 2), rep(2, 2)))
+    expect_equal(findMovement(x, lbuffer = 1),
+                 c(rep(NA, 5), rep(1, 7), rep(NA, 3), rep(2, 2)))
+    expect_equal(findMovement(x, direction = "down", buffer = 1),
+                 c(rep(1, 4), rep(NA, 9), rep(2, 3), NA))
+    expect_equal(findMovement(x, direction = "down", rbuffer = 1),
+                 c(rep(1, 4), rep(NA, 10), rep(2, 2), NA))
+    expect_equal(findMovement(x, direction = "down", lbuffer = 1),
+                 c(rep(1, 3), rep(NA, 10), rep(2, 3), NA))
+
     expect_equal(findMovement(x, buffer = 2),
                  c(rep(NA, 5), rep(1, 9), rep(NA, 1), rep(2, 2)))
     expect_equal(findMovement(x, buffer = 10),
                  c(rep(NA, 5), rep(1, 10), rep(2, 2)))
 
-    expect_equal(findMovement(x, buffer = 1, direction = "down"),
-                 c(rep(1, 4), rep(NA, 9), rep(2, 3), NA))
     expect_equal(findMovement(x, buffer = 10, direction = "down"),
                  c(rep(1, 4), rep(NA, 7), rep(2, 5), NA))
-
-    expect_equal(findMovement(x, lbuffer = 1),
-                 c(rep(NA, 5), rep(1, 7), rep(NA, 3), rep(2, 2)))
-    expect_equal(findMovement(x, direction = "down", rbuffer = 1),
-                 c(rep(1, 3), rep(NA, 10), rep(2, 3), NA))
 
     expect_error(findMovement(x, direction = "foo"), "Invalid direction argument")
     expect_error(findMovement(x, buffer = -1), "Buffer values cannot be less than 0")
