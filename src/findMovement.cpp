@@ -127,11 +127,10 @@ NumericVector findMovement(NumericVector v,
       // TODO: pop stack instead of calling .size()
       int head = stack.front();
       int tail;
-      if (stack.size() > 1) {
+      if (stack.size() > 1)
         tail = stack.back() + 1;
-      } else {
+      else
         tail = head + 1;
-      }
 
       // If we don't start below lower_lim or end above
       // upper_lim, flush queue and search for next seq
@@ -146,13 +145,16 @@ NumericVector findMovement(NumericVector v,
       // Buffer beginning of sequence
       if (startbufsiz != 0 && head != stop) {
         int b = min(head - stop - 1, startbufsiz);
-        head = head - b;
+        head -= b;
       }
 
       // Buffer end of sequence
       if (stopbufsiz != 0 && tail != i + 1) {
-        int b = min(i - tail, stopbufsiz);
-        tail = tail + b;
+        // If we're at the end of seq and it's not a stop value, we need to offset by 1
+        int end_offset = (i == d_len - 1 && d[i] >= 0) ? 1 : 0;
+
+        int b = min(i - tail + end_offset, stopbufsiz);
+        tail += b;
       }
 
       NumericVector sub = NumericVector(tail - head + 1);

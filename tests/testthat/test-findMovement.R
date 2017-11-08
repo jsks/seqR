@@ -35,12 +35,18 @@ test_that("Finding subsequences", {
                  c(rep(NA, 5), rep(1, 9), rep(NA, 1), rep(2, 2)))
     expect_equal(findMovement(x, buffer = 10),
                  c(rep(NA, 5), rep(1, 10), rep(2, 2)))
-
     expect_equal(findMovement(x, buffer = 10, direction = "down"),
                  c(rep(1, 4), rep(NA, 7), rep(2, 5), NA))
 
     expect_error(findMovement(x, direction = "foo"), "Invalid direction argument")
     expect_error(findMovement(x, buffer = -1), "Buffer values cannot be less than 0")
+
+    # What happens when max/min value extends to end of seq?
+    z <- c(0, 1, 2, 3, 3, 3)
+    expect_equal(findMovement(z, buffer = 10), rep(1, 6))
+
+    z <- c(4, 4, 3, 2, 1, 1)
+    expect_equal(findMovement(z, direction = "down", buffer = 10), rep(1, 6))
 
     expect_equal(findMovement(c(1, 1, 1, 1)), as.numeric(rep(NA, 4)))
     expect_equal(findMovement(c(NA, 1, NA)), as.numeric(rep(NA, 3)))
