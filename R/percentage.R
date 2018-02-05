@@ -5,6 +5,8 @@
 #' @param data A `data.frame`.
 #' @param complete.obs A boolean value. Calculate percentages based on
 #'     complete observations for each pair of variables. Default: `TRUE`.
+#' @param reduce A boolean value. For each variable pair, reduce the data to
+#'     only changes before calculating the percentage table.
 #'
 #' @return A `data.frame` where the last three columns break down the
 #'     relative frequency of variable `X` being larger than variable
@@ -15,7 +17,7 @@
 #' ptable(x)
 #' 
 #' @export
-ptable <- function(data, complete.obs = T) {
+ptable <- function(data, complete.obs = T, reduce = F) {
     if (!"data.frame" %in% class(data))
         stop("Expects a data frame")
     
@@ -34,8 +36,12 @@ ptable <- function(data, complete.obs = T) {
         var2 <- varlist[2, C]
 
         final[C, c("X", "Y")] <- c(var1, var2)
-        final[C, c("X>Y", "X=Y", "X<Y")] <- percents(data[, var1], data[, var2],
-                                                     complete.obs)
+
+        reduced.df <- if (reduce) collapse(data[, c(var1, var2)]) else data[, c(var1, var2)]
+
+        final[C, c("X>Y", "X=Y", "X<Y")] <- percents(reduced.df[, var1],
+                                                    reduced.df[, var2],
+                                                    complete.obs)
 
         if (final[C, "X<Y"] > final[C, "X>Y"]) {
             tmp <- final[C, "X<Y"]

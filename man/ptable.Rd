@@ -4,13 +4,16 @@
 \alias{ptable}
 \title{Percentage Table}
 \usage{
-ptable(data, complete.obs = T)
+ptable(data, complete.obs = T, reduce = F)
 }
 \arguments{
 \item{data}{A \code{data.frame}.}
 
 \item{complete.obs}{A boolean value. Calculate percentages based on
 complete observations for each pair of variables. Default: \code{TRUE}.}
+
+\item{reduce}{A boolean value. For each variable pair, reduce the data to
+only changes before calculating the percentage table.}
 }
 \value{
 A \code{data.frame} where the last three columns break down the
